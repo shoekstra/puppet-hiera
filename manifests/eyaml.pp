@@ -10,44 +10,37 @@
 #
 # Copyright (C) 2014 Terri Haber, unless otherwise noted.
 #
-class hiera::eyaml (
-  $provider = $hiera::params::provider,
-  $owner    = $hiera::params::owner,
-  $group    = $hiera::params::group,
-  $cmdpath  = $hiera::params::cmdpath,
-  $confdir  = $hiera::params::confdir
-) inherits hiera::params {
-
+class hiera::eyaml { 
   package { 'hiera-eyaml':
     ensure   => installed,
-    provider => $provider,
+    provider => $hiera::provider,
   }
 
-  file { "${confdir}/keys":
+  file { "${hiera::confdir}/keys":
     ensure => directory,
-    owner  => $owner,
-    group  => $group,
+    owner  => $hiera::owner,
+    group  => $hiera::group,
     before => Exec['createkeys'],
   }
 
   exec { 'createkeys':
-    user    => $owner,
-    cwd     => $confdir,
+    user    => $hiera::owner,
+    cwd     => $hiera::confdir,
     command => 'eyaml createkeys',
-    path    => $cmdpath,
-    creates => "${confdir}/keys/private_key.pkcs7.pem",
+    path    => $hiera::cmdpath,
+    creates => "${hiera::confdir}/keys/private_key.pkcs7.pem",
     require => Package['hiera-eyaml'],
   }
 
   $eyaml_files = [
-    "${confdir}/keys/private_key.pkcs7.pem",
-    "${confdir}/keys/public_key.pkcs7.pem"]
+    "${hiera::confdir}/keys/private_key.pkcs7.pem",
+    "${hiera::confdir}/keys/public_key.pkcs7.pem"]
 
   file { $eyaml_files:
     ensure  => file,
     mode    => '0604',
-    owner   => $owner,
-    group   => $group,
+    owner   => $hiera::owner,
+    group   => $hiera::group,
     require => Exec['createkeys'],
   }
 }
